@@ -6,7 +6,13 @@ import Swal from "sweetalert2";
 
 export default function Register() {
   const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "", confirmPassword: "" });
+  const [form, setForm] = useState({
+    name: "",
+    surname: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -16,6 +22,11 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic validation
+    if (!form.name || !form.surname) {
+      return Swal.fire({ title: "Error", text: "Name and surname are required", icon: "error" });
+    }
+
     if (!form.email.includes("@")) {
       return Swal.fire({ title: "Error", text: "Email must contain @", icon: "error" });
     }
@@ -24,21 +35,39 @@ export default function Register() {
       return Swal.fire({ title: "Error", text: "Passwords do not match", icon: "error" });
     }
 
+    if (form.password.length < 10) {
+      return Swal.fire({
+        title: "Error",
+        text: "Password must be at least 10 characters long",
+        icon: "error",
+      });
+    }
+
     setLoading(true);
     try {
       const res = await fetch("http://localhost:8000/api/register/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password }),
+        body: JSON.stringify({
+          name: form.name,
+          surname: form.surname,
+          email: form.email,
+          password: form.password,
+        }),
       });
-      const data = await res.json();
 
+      const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Registration failed");
 
-      await Swal.fire({ title: "Success!", text: `User ${data.email} registered.`, icon: "success" });
-      setForm({ email: "", password: "", confirmPassword: "" });
+      await Swal.fire({
+        title: "Success!",
+        text: `User ${data.name} ${data.surname} registered successfully.`,
+        icon: "success",
+      });
 
-      // Navigate to login page after registration
+      // Reset form correctly
+      setForm({ name: "", surname: "", email: "", password: "", confirmPassword: "" });
+
       router.push("/login");
     } catch (err) {
       Swal.fire({ title: "Error", text: err.message, icon: "error" });
@@ -91,6 +120,20 @@ export default function Register() {
         <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: 500 }}>
           <Stack spacing={3}>
             <TextField
+              label="Name"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+            <TextField
+              label="Surname"
+              name="surname"
+              value={form.surname}
+              onChange={handleChange}
+              required
+            />
+            <TextField
               label="Email"
               name="email"
               type="email"
@@ -116,7 +159,12 @@ export default function Register() {
               required
             />
 
-            <Button type="submit" variant="contained" disabled={loading} sx={{ py: 2, fontSize: 18 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              sx={{ py: 2, fontSize: 18 }}
+            >
               {loading ? "Registering..." : "Register"}
             </Button>
           </Stack>
