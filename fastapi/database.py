@@ -2,7 +2,7 @@ from databases import Database
 
 POSTGRES_USER = "temp"
 POSTGRES_PASSWORD = "temp"
-POSTGRES_DB = "advcompro"
+POSTGRES_DB = "drone"
 POSTGRES_HOST = "db"
 
 DATABASE_URL = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}'

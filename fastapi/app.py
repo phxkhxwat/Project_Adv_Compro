@@ -1,13 +1,21 @@
-from typing import Union
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from database import *
-from routes.users import router
-
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routes import users
+from database import connect_db, disconnect_db
 
 app = FastAPI()
 
-app.include_router(router, prefix="/api")
+# Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # adjust in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include routes
+app.include_router(users.router, prefix="/api", tags=["users"])
 
 @app.on_event("startup")
 async def startup():
