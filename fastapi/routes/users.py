@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr, constr
 from datetime import datetime
-from database import database
+from database import database , insert_address, get_address , update_address
 import hashlib
 import re
 
@@ -33,6 +33,20 @@ class UserOut(BaseModel):
     user_id: int
     email: EmailStr
     created_at: datetime
+    
+# -----------------------------
+# Address Models
+# -----------------------------
+class AddressCreate(BaseModel):
+    user_id: int
+    street: str
+    city: str
+    postal_code: str
+    country: str
+
+class AddressOut(AddressCreate):
+    id: int
+
 
 # -----------------------------
 # Endpoints
@@ -65,3 +79,44 @@ async def login(user: UserCreate):
     if db_user["password_hash"] != hash_password(user.password):
         raise HTTPException(status_code=401, detail="Incorrect password")
     return {"message": "Login successful", "email": db_user["email"], "user_id": db_user["user_id"]}
+
+# -----------------------------
+# Address Endpoints
+# -----------------------------
+
+# Add new address
+@router.post("/address/", response_model=AddressOut)
+async def add_address(address: AddressCreate):
+    try:
+        return await insert_address(
+            user_id=address.user_id,
+            street=address.street,
+            city=address.city,
+            postal_code=address.postal_code,
+            country=address.country,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Get addresses for a user
+@router.get("/address/{user_id}", response_model=list[AddressOut])
+async def get_user_address(user_id: int):
+    try:
+        return await get_address(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+# Update existing address
+@router.put("/address/{user_id}", response_model=AddressOut)
+async def update_user_address(user_id: int, address: AddressCreate):
+    existing = await get_address(user_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Address not found")
+    address_id = existing[0]["id"]  # take the first address
+    return await update_address(
+        id=address_id,
+        street=address.street,
+        city=address.city,
+        postal_code=address.postal_code,
+        country=address.country
+    )

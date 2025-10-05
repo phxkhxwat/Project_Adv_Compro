@@ -18,7 +18,9 @@ async def disconnect_db():
     print("Database disconnected")
 
 
-# Function to insert a new user into the users table
+# -----------------------------
+# Users CRUD
+# -----------------------------
 async def insert_user(username: str, password_hash: str, email: str):
     query = """
     INSERT INTO users (username, password_hash, email)
@@ -28,12 +30,10 @@ async def insert_user(username: str, password_hash: str, email: str):
     values = {"username": username, "password_hash": password_hash, "email": email}
     return await database.fetch_one(query=query, values=values)
 
-# Function to select a user by user_id from the users table
 async def get_user(user_id: int):
     query = "SELECT * FROM users WHERE user_id = :user_id"
     return await database.fetch_one(query=query, values={"user_id": user_id})
 
-# Function to update a user in the users table
 async def update_user(user_id: int, username: str, password_hash: str, email: str):
     query = """
     UPDATE users 
@@ -44,9 +44,105 @@ async def update_user(user_id: int, username: str, password_hash: str, email: st
     values = {"user_id": user_id, "username": username, "password_hash": password_hash, "email": email}
     return await database.fetch_one(query=query, values=values)
 
-# Function to delete a user from the users table
 async def delete_user(user_id: int):
     query = "DELETE FROM users WHERE user_id = :user_id RETURNING *"
     return await database.fetch_one(query=query, values={"user_id": user_id})
 
 
+# -----------------------------
+# Address CRUD
+# -----------------------------
+async def insert_address(user_id: int, street: str, city: str, postal_code: str, country: str):
+    query = """
+    INSERT INTO address (user_id, street, city, postal_code, country)
+    VALUES (:user_id, :street, :city, :postal_code, :country)
+    RETURNING id, user_id, street, city, postal_code, country
+    """
+    values = {
+        "user_id": user_id,
+        "street": street,
+        "city": city,
+        "postal_code": postal_code,
+        "country": country,
+    }
+    return await database.fetch_one(query=query, values=values)
+
+async def get_address(user_id: int):
+    query = "SELECT * FROM address WHERE user_id = :user_id"
+    return await database.fetch_all(query=query, values={"user_id": user_id})
+
+async def update_address(id: int, street: str, city: str, postal_code: str, country: str):
+    query = """
+    UPDATE address
+    SET street=:street, city=:city, postal_code=:postal_code, country=:country
+    WHERE id=:id
+    RETURNING id, user_id, street, city, postal_code, country
+    """
+    values = {"id": id, "street": street, "city": city, "postal_code": postal_code, "country": country}
+    return await database.fetch_one(query=query, values=values)
+
+async def delete_address(id: int):
+    query = "DELETE FROM address WHERE id=:id RETURNING *"
+    return await database.fetch_one(query=query, values={"id": id})
+
+
+# -----------------------------
+# Stock CRUD
+# -----------------------------
+async def insert_stock(name: str, description: str, price: float, quantity: int):
+    query = """
+    INSERT INTO stock (name, description, price, quantity)
+    VALUES (:name, :description, :price, :quantity)
+    RETURNING stock_id, name, description, price, quantity
+    """
+    values = {"name": name, "description": description, "price": price, "quantity": quantity}
+    return await database.fetch_one(query=query, values=values)
+
+async def get_stock(stock_id: int):
+    query = "SELECT * FROM stock WHERE stock_id = :stock_id"
+    return await database.fetch_one(query=query, values={"stock_id": stock_id})
+
+async def update_stock(stock_id: int, name: str, description: str, price: float, quantity: int):
+    query = """
+    UPDATE stock
+    SET name=:name, description=:description, price=:price, quantity=:quantity
+    WHERE stock_id=:stock_id
+    RETURNING stock_id, name, description, price, quantity
+    """
+    values = {"stock_id": stock_id, "name": name, "description": description, "price": price, "quantity": quantity}
+    return await database.fetch_one(query=query, values=values)
+
+async def delete_stock(stock_id: int):
+    query = "DELETE FROM stock WHERE stock_id=:stock_id RETURNING *"
+    return await database.fetch_one(query=query, values={"stock_id": stock_id})
+
+
+# -----------------------------
+# Order CRUD
+# -----------------------------
+async def insert_order(user_id: int, address_id: int, total_price: float):
+    query = """
+    INSERT INTO "order" (user_id, address_id, total_price, created_at)
+    VALUES (:user_id, :address_id, :total_price, NOW())
+    RETURNING order_id, user_id, address_id, total_price, created_at
+    """
+    values = {"user_id": user_id, "address_id": address_id, "total_price": total_price}
+    return await database.fetch_one(query=query, values=values)
+
+async def get_order(order_id: int):
+    query = 'SELECT * FROM "order" WHERE order_id = :order_id'
+    return await database.fetch_one(query=query, values={"order_id": order_id})
+
+async def update_order(order_id: int, total_price: float):
+    query = """
+    UPDATE "order"
+    SET total_price=:total_price
+    WHERE order_id=:order_id
+    RETURNING order_id, user_id, address_id, total_price, created_at
+    """
+    values = {"order_id": order_id, "total_price": total_price}
+    return await database.fetch_one(query=query, values=values)
+
+async def delete_order(order_id: int):
+    query = 'DELETE FROM "order" WHERE order_id=:order_id RETURNING *'
+    return await database.fetch_one(query=query, values={"order_id": order_id})

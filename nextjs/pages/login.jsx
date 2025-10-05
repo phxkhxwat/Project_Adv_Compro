@@ -9,7 +9,7 @@ export default function Login() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
 
-  // Redirect to home if already logged in
+  // Redirect if already logged in
   useEffect(() => {
     const user = localStorage.getItem("user");
     if (user) {
@@ -17,7 +17,7 @@ export default function Login() {
         title: "Already Logged In",
         text: "You are already logged in!",
         icon: "info",
-      }).then(() => router.push("/"));
+      }).then(() => router.push("/profile"));
     }
   }, [router]);
 
@@ -38,53 +38,44 @@ export default function Login() {
 
       if (!res.ok) throw new Error(result.detail || "Login failed");
 
-      // Store login flag in localStorage
-      localStorage.setItem("user", JSON.stringify({ email: form.email }));
+      // Store user info
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ email: result.email, user_id: result.user_id })
+      );
 
       await Swal.fire({ title: "Success!", text: result.message, icon: "success" });
 
-      router.push("/");
+      router.push("/profile");
     } catch (err) {
       Swal.fire({ title: "Error", text: err.message, icon: "error" });
     }
   };
 
-  const goToRegister = () => {
-    router.push("/register");
-  };
+  const goToRegister = () => router.push("/register");
 
   return (
     <Box sx={{ display: "flex", height: "100vh", backgroundColor: "#F2EDD1", position: "relative" }}>
-      {/* X Button */}
+      {/* Close Button */}
       <IconButton
         onClick={() => router.push("/")}
         sx={{
-          position: "absolute",
-          top: 20,
-          right: 20,
-          color: "#280A3E",
-          bgcolor: "#F9CB99",
-          "&:hover": { bgcolor: "#e0b87a" },
-          zIndex: 10,
+          position: "absolute", top: 20, right: 20,
+          color: "#280A3E", bgcolor: "#F9CB99",
+          "&:hover": { bgcolor: "#e0b87a" }, zIndex: 10
         }}
       >
         <CloseIcon fontSize="large" />
       </IconButton>
 
-      {/* Left Panel: Form */}
+      {/* Left Panel */}
       <Box sx={{ flex: 1, px: 8, py: 10, position: "relative" }}>
-        <Typography
-          variant="h1"
-          sx={{ fontSize: "64px", fontWeight: 700, color: "#280A3E", mb: 8 }}
-        >
+        <Typography variant="h1" sx={{ fontSize: 64, fontWeight: 700, color: "#280A3E", mb: 8 }}>
           LOG IN
         </Typography>
 
-        {/* Username */}
         <Box sx={{ mb: 6 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-            USERNAME
-          </Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>USERNAME</Typography>
           <TextField
             fullWidth
             placeholder="Enter Username"
@@ -93,24 +84,15 @@ export default function Login() {
             onChange={handleChange}
             sx={{
               borderRadius: "15px",
-              "& .MuiOutlinedInput-root": {
-                height: 85,
-                padding: "0 10px",
-                fontSize: "36px",
-                fontWeight: 700,
-                color: "#000",
-              },
+              "& .MuiOutlinedInput-root": { height: 85, padding: "0 10px", fontSize: 36, fontWeight: 700, color: "#000" },
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#7F7C7C", borderWidth: 2 },
-              "& .MuiInputBase-input::placeholder": { color: "#7F7C7C", opacity: 1 },
+              "& .MuiInputBase-input::placeholder": { color: "#7F7C7C", opacity: 1 }
             }}
           />
         </Box>
 
-        {/* Password */}
         <Box sx={{ mb: 2 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-            PASSWORD
-          </Typography>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>PASSWORD</Typography>
           <TextField
             fullWidth
             placeholder="Enter Password"
@@ -120,56 +102,28 @@ export default function Login() {
             onChange={handleChange}
             sx={{
               borderRadius: "15px",
-              "& .MuiOutlinedInput-root": {
-                height: 86,
-                padding: "0 10px",
-                fontSize: "36px",
-                fontWeight: 700,
-                color: "#000",
-              },
+              "& .MuiOutlinedInput-root": { height: 86, padding: "0 10px", fontSize: 36, fontWeight: 700, color: "#000" },
               "& .MuiOutlinedInput-notchedOutline": { borderColor: "#7F7C7C", borderWidth: 2 },
-              "& .MuiInputBase-input::placeholder": { color: "#7F7C7C", opacity: 1 },
+              "& .MuiInputBase-input::placeholder": { color: "#7F7C7C", opacity: 1 }
             }}
           />
         </Box>
 
-        {/* Forgot Password */}
         <Typography sx={{ fontSize: 20, fontWeight: 700, color: "#7F7C7C", mb: 6 }}>
           forgot password ?
         </Typography>
 
-        {/* Buttons */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 4, width: 404 }}>
-          <Button
-            onClick={handleSubmit}
-            sx={{
-              borderRadius: "30px",
-              backgroundColor: "#280A3E",
-              py: 3,
-              fontSize: 36,
-              fontWeight: 700,
-              "&:hover": { backgroundColor: "#3b1160" },
-            }}
-          >
+          <Button onClick={handleSubmit} sx={{ borderRadius: "30px", backgroundColor: "#280A3E", py: 3, fontSize: 36, fontWeight: 700, "&:hover": { backgroundColor: "#3b1160" } }}>
             LOGIN
           </Button>
-          <Button
-            onClick={goToRegister}
-            sx={{
-              borderRadius: "30px",
-              backgroundColor: "#280A3E",
-              py: 3,
-              fontSize: 36,
-              fontWeight: 700,
-              "&:hover": { backgroundColor: "#3b1160" },
-            }}
-          >
+          <Button onClick={goToRegister} sx={{ borderRadius: "30px", backgroundColor: "#280A3E", py: 3, fontSize: 36, fontWeight: 700, "&:hover": { backgroundColor: "#3b1160" } }}>
             REGISTER
           </Button>
         </Box>
       </Box>
 
-      {/* Right Panel: Image */}
+      {/* Right Panel */}
       <Box sx={{ flex: 1, position: "relative", backgroundColor: "#689B8A" }}>
         <Image
           src="https://api.builder.io/api/v1/image/assets/TEMP/b17055f8d6e30a30a812f1b290b7f3576570d2f5?width=1334"
