@@ -69,13 +69,17 @@ async def create_order(order: OrderCreate):
         "created_at": datetime.utcnow(),
     }
 
-    try:
-        new_order = await database.fetch_one(query=query, values=values)
-        if new_order:
-            new_order = dict(new_order)
-            new_order["items"] = json.loads(new_order["items"])
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    # try:
+    #     new_order = await database.fetch_one(query=query, values=values)
+    #     if new_order:
+    #         new_order = dict(new_order)
+    #         new_order["items"] = json.loads(new_order["items"])
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    new_order = await database.fetch_one(query=query, values=values)
+    if new_order:
+        new_order = dict(new_order)
+        new_order["items"] = json.loads(new_order["items"])
 
     return new_order
 
