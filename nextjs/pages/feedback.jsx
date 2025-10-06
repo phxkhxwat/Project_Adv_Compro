@@ -73,7 +73,7 @@ export default function Feedback() {
         <meta name="description" content="User feedback for Drone Shop" />
       </Head>
 
-      <Box sx={{ minHeight: "100vh", backgroundColor: "#C7EFCF" }}>
+      <Box sx={{ minHeight: "100vh", backgroundColor: "#F2EDD1" }}>
         {/* Left Panel */}
         <Box
           sx={{
@@ -138,7 +138,7 @@ export default function Feedback() {
         <Box sx={{ ml: { xs: "60px", sm: "220px" }, py: 5 }}>
           <Container maxWidth="md">
             <Box sx={{ textAlign: "left", mb: 5 }}>
-              <Typography variant="h3" sx={{ color: "#FFD700", fontWeight: 700, mb: 2 }}>User Feedback</Typography>
+              <Typography variant="h3" sx={{ color: "#b03f3f", fontWeight: 700, mb: 2 }}>User Feedback</Typography>
               <Box sx={{ height: 4, width: 150, backgroundColor: "#689B8A", borderRadius: "2px" }} />
             </Box>
 
