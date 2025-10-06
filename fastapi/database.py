@@ -1,4 +1,6 @@
 from databases import Database
+from datetime import datetime
+import json
 
 POSTGRES_USER = "temp"
 POSTGRES_PASSWORD = "temp"
@@ -120,33 +122,57 @@ async def delete_stock(stock_id: int):
 # -----------------------------
 # Order CRUD
 # -----------------------------
-async def insert_order(user_id: int, address_id: int, total_price: float):
+
+async def insert_order(user_id: int, address_id: int, total_price: float, items: list):
     query = """
-    INSERT INTO "order" (user_id, address_id, total_price, created_at)
-    VALUES (:user_id, :address_id, :total_price, NOW())
-    RETURNING order_id, user_id, address_id, total_price, created_at
+    INSERT INTO orders (user_id, address_id, total_price, items, created_at)
+    VALUES (:user_id, :address_id, :total_price, :items, :created_at)
+    RETURNING order_id, user_id, address_id, total_price, items, created_at
     """
-    values = {"user_id": user_id, "address_id": address_id, "total_price": total_price}
+    values = {
+        "user_id": user_id,
+        "address_id": address_id,
+        "total_price": total_price,
+        "items": json.dumps(items),
+        "created_at": datetime.utcnow(),
+    }
     return await database.fetch_one(query=query, values=values)
+
 
 async def get_order(order_id: int):
-    query = 'SELECT * FROM "order" WHERE order_id = :order_id'
-    return await database.fetch_one(query=query, values={"order_id": order_id})
+    query = "SELECT * FROM orders WHERE order_id = :order_id"
+    order = await database.fetch_one(query=query, values={"order_id": order_id})
+    if order:
+        order = dict(order)
+        order["items"] = json.loads(order["items"])
+    return order
 
-async def update_order(order_id: int, total_price: float):
+
+async def get_user_orders(user_id: int):
+    query = "SELECT * FROM orders WHERE user_id = :user_id"
+    rows = await database.fetch_all(query=query, values={"user_id": user_id})
+    orders = []
+    for row in rows:
+        row_dict = dict(row)
+        row_dict["items"] = json.loads(row_dict["items"])
+        orders.append(row_dict)
+    return orders
+
+
+async def update_order(order_id: int, total_price: float, items: list):
     query = """
-    UPDATE "order"
-    SET total_price=:total_price
+    UPDATE orders
+    SET total_price=:total_price, items=:items
     WHERE order_id=:order_id
-    RETURNING order_id, user_id, address_id, total_price, created_at
+    RETURNING order_id, user_id, address_id, total_price, created_at, items
     """
-    values = {"order_id": order_id, "total_price": total_price}
+    values = {"order_id": order_id, "total_price": total_price, "items": json.dumps(items)}
     return await database.fetch_one(query=query, values=values)
 
-async def delete_order(order_id: int):
-    query = 'DELETE FROM "order" WHERE order_id=:order_id RETURNING *'
-    return await database.fetch_one(query=query, values={"order_id": order_id})
 
+async def delete_order(order_id: int):
+    query = "DELETE FROM orders WHERE order_id=:order_id RETURNING *"
+    return await database.fetch_one(query=query, values={"order_id": order_id})
 # -----------------------------
 # Feedback CRUD
 # -----------------------------
