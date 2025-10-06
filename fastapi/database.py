@@ -146,3 +146,50 @@ async def update_order(order_id: int, total_price: float):
 async def delete_order(order_id: int):
     query = 'DELETE FROM "order" WHERE order_id=:order_id RETURNING *'
     return await database.fetch_one(query=query, values={"order_id": order_id})
+
+# -----------------------------
+# Feedback CRUD
+# -----------------------------
+async def insert_feedback(user_id: int, rating: int, comment: str = None):
+    query = """
+    INSERT INTO feedback (user_id, rating, comment)
+    VALUES (:user_id, :rating, :comment)
+    RETURNING feedback_id, user_id, rating, comment, created_at
+    """
+    values = {"user_id": user_id, "rating": rating, "comment": comment}
+    row = await database.fetch_one(query=query, values=values)
+    return row  # fetch_one already returns the inserted row
+
+async def get_feedback(feedback_id: int):
+    query = "SELECT * FROM feedback WHERE feedback_id = :feedback_id"
+    return await database.fetch_one(query=query, values={"feedback_id": feedback_id})
+
+async def get_all_feedback():
+    query = """
+    SELECT 
+        f.feedback_id, 
+        f.user_id, 
+        f.rating, 
+        f.comment, 
+        f.created_at,
+        u.name 
+    FROM feedback f
+    LEFT JOIN users u ON f.user_id = u.user_id
+    ORDER BY f.created_at DESC
+    """
+    return await database.fetch_all(query=query)
+
+
+async def update_feedback(feedback_id: int, rating: int, comment: str = None):
+    query = """
+    UPDATE feedback
+    SET rating=:rating, comment=:comment
+    WHERE feedback_id=:feedback_id
+    RETURNING feedback_id, user_id, rating, comment, created_at
+    """
+    values = {"feedback_id": feedback_id, "rating": rating, "comment": comment}
+    return await database.fetch_one(query=query, values=values)
+
+async def delete_feedback(feedback_id: int):
+    query = "DELETE FROM feedback WHERE feedback_id=:feedback_id RETURNING *"
+    return await database.fetch_one(query=query, values={"feedback_id": feedback_id})

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import users , stock, order
+from routes import users , stock, order , feedback
 from database import connect_db, disconnect_db
 
 app = FastAPI()
@@ -16,8 +16,10 @@ app.add_middleware(
 
 # Include routes
 app.include_router(users.router, prefix="/api", tags=["users"])
-app.include_router(stock.router, prefix="/api/stock", tags=["stock"])
-app.include_router(order.router, prefix="/api/order", tags=["orders"])
+app.include_router(stock.router, prefix="/stock", tags=["stock"])
+app.include_router(order.router, prefix="/order", tags=["orders"])
+app.include_router(feedback.router, prefix="/feedback", tags=["feedback"])
+
 
 @app.on_event("startup")
 async def startup():

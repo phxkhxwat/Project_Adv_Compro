@@ -148,6 +148,24 @@ export default function Home() {
               Show All
             </Button>
 
+            {/*Feedback button */}
+            <Button
+              onClick={() => router.push("/feedback")}
+              variant="contained"
+              sx={{
+                backgroundColor: "#FFD700",
+                fontWeight: 700,
+                py: 1.5,
+                fontSize: 16,
+                borderRadius: "25px",
+                mt: 5,
+                width: "100%",
+                "&:hover": { backgroundColor: "#e6c200" },
+              }}
+            >
+              Feedback
+            </Button>
+
             {/* Login / Logout below price buttons */}
             {!isLoggedIn ? (
               <Link href="/login" passHref>
